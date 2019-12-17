@@ -108,7 +108,6 @@ void clear_z_buffer(){
 
 void free_z_buffer(){
 	unsigned int i;
-	unsigned int j;
 	for(i = 0; i < (COLS - 1)*8; i++){
 		free(z_buffer[i]);
 	}
@@ -125,8 +124,6 @@ vec2 get_point_3D(CAM_screen *s, vec3 p){
 }
 
 unsigned char pixel_handler(unsigned int x, unsigned int y, unsigned char color){
-	double x3d;
-	double y3d;
 	double z3d;
 
 	z3d = normal_constant*fov_constant/dot(normal, (vec3) {.x = x - ((double) screen->width)/2, .y = y - ((double) screen->height)/2, .z = fov_constant});
@@ -385,7 +382,6 @@ void free_r_cube(){
 
 orientation create_random_rotation(){
 	vec3 v;
-	double d;
 
 	v = (vec3) {.x = rand()%100 - 50, .y = rand()%100 - 50, .z = rand()%100 - 50};
 
@@ -393,14 +389,10 @@ orientation create_random_rotation(){
 }
 
 int main(int argc, char **argv){
-	unsigned int i;
-	shape cube;
 	orientation x_rotate;
 	orientation y_rotate;
 	orientation z_rotate;
 	orientation current_orientation = (orientation) {.real = 0, .i = 0, .j = 0, .k = 1};
-	orientation random_orientation;
-	orientation random_orientation_change;
 	struct timespec current_time;
 	struct timespec sleep_time;
 	unsigned long int last_nanoseconds;
@@ -409,9 +401,7 @@ int main(int argc, char **argv){
 	unsigned char do_update;
 	unsigned char quit = 0;
 	unsigned char first_frame = 1;
-	unsigned char last_face = 6;
 
-	random_orientation = create_random_rotation();
 	animation_frame = 10;
 	memset(&r_cube, 0, sizeof(rubiks_cube));
 	initscr();
