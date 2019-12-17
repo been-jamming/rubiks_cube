@@ -314,61 +314,61 @@ void do_animation_frame(orientation current_orientation){
 
 void create_r_cube(){
 	//Top slice
-	create_cube(r_cube.cubies, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
+	create_cube(r_cube.cubies, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
 	translate_shape(r_cube.cubies, (vec3) {.x = -1.1, .y = -1.1, .z = -1.1});
-	create_cube(r_cube.cubies + 1, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
+	create_cube(r_cube.cubies + 1, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 1, (vec3) {.x = 0, .y = -1.1, .z = -1.1});
-	create_cube(r_cube.cubies + 2, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_GREEN, COLOR_YELLOW, COLOR_BLACK);
+	create_cube(r_cube.cubies + 2, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_GREEN, COLOR_YELLOW, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 2, (vec3) {.x = 1.1, .y = -1.1, .z = -1.1});
-	create_cube(r_cube.cubies + 3, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
+	create_cube(r_cube.cubies + 3, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 3, (vec3) {.x = -1.1, .y = -1.1, .z = 0});
-	create_cube(r_cube.cubies + 4, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
+	create_cube(r_cube.cubies + 4, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 4, (vec3) {.x = 0, .y = -1.1, .z = 0});
-	create_cube(r_cube.cubies + 5, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_BLACK);
+	create_cube(r_cube.cubies + 5, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 5, (vec3) {.x = 1.1, .y = -1.1, .z = 0});
-	create_cube(r_cube.cubies + 6, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
+	create_cube(r_cube.cubies + 6, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 6, (vec3) {.x = -1.1, .y = -1.1, .z = 1.1});
-	create_cube(r_cube.cubies + 7, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
+	create_cube(r_cube.cubies + 7, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 7, (vec3) {.x = 0, .y = -1.1, .z = 1.1});
-	create_cube(r_cube.cubies + 8, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_CYAN);
+	create_cube(r_cube.cubies + 8, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 8, (vec3) {.x = 1.1, .y = -1.1, .z = 1.1});
 
 	//Middle slice
-	create_cube(r_cube.cubies + 9, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
+	create_cube(r_cube.cubies + 9, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 9, (vec3) {.x = -1.1, .y = 0, .z = -1.1});
-	create_cube(r_cube.cubies + 10, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
+	create_cube(r_cube.cubies + 10, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 10, (vec3) {.x = 0, .y = 0, .z = -1.1});
-	create_cube(r_cube.cubies + 11, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_YELLOW, COLOR_BLACK);
+	create_cube(r_cube.cubies + 11, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_YELLOW, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 11, (vec3) {.x = 1.1, .y = 0, .z = -1.1});
-	create_cube(r_cube.cubies + 12, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
+	create_cube(r_cube.cubies + 12, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 12, (vec3) {.x = -1.1, .y = 0, .z = 0});
-	create_cube(r_cube.cubies + 13, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_BLACK);
+	create_cube(r_cube.cubies + 13, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 13, (vec3) {.x = 1.1, .y = 0, .z = 0});
-	create_cube(r_cube.cubies + 14, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
+	create_cube(r_cube.cubies + 14, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 14, (vec3) {.x = -1.1, .y = 0, .z = 1.1});
-	create_cube(r_cube.cubies + 15, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
+	create_cube(r_cube.cubies + 15, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 15, (vec3) {.x = 0, .y = 0, .z = 1.1});
-	create_cube(r_cube.cubies + 16, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_CYAN);
+	create_cube(r_cube.cubies + 16, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 16, (vec3) {.x = 1.1, .y = 0, .z = 1.1});
 
 	//Bottom slice
-	create_cube(r_cube.cubies + 17, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
+	create_cube(r_cube.cubies + 17, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 17, (vec3) {.x = -1.1, .y = 1.1, .z = -1.1});
-	create_cube(r_cube.cubies + 18, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
+	create_cube(r_cube.cubies + 18, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 18, (vec3) {.x = 0, .y = 1.1, .z = -1.1});
-	create_cube(r_cube.cubies + 19, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_YELLOW, COLOR_BLACK);
+	create_cube(r_cube.cubies + 19, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_YELLOW, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 19, (vec3) {.x = 1.1, .y = 1.1, .z = -1.1});
-	create_cube(r_cube.cubies + 20, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
+	create_cube(r_cube.cubies + 20, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 20, (vec3) {.x = -1.1, .y = 1.1, .z = 0});
-	create_cube(r_cube.cubies + 21, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
+	create_cube(r_cube.cubies + 21, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 21, (vec3) {.x = 0, .y = 1.1, .z = 0});
-	create_cube(r_cube.cubies + 22, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_BLACK);
+	create_cube(r_cube.cubies + 22, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_BLACK);
 	translate_shape(r_cube.cubies + 22, (vec3) {.x = 1.1, .y = 1.1, .z = 0});
-	create_cube(r_cube.cubies + 23, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
+	create_cube(r_cube.cubies + 23, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLUE, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 23, (vec3) {.x = -1.1, .y = 1.1, .z = 1.1});
-	create_cube(r_cube.cubies + 24, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
+	create_cube(r_cube.cubies + 24, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 24, (vec3) {.x = 0, .y = 1.1, .z = 1.1});
-	create_cube(r_cube.cubies + 25, (vec3) {.x = 0, .y = 0, .z = 4}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_CYAN);
+	create_cube(r_cube.cubies + 25, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 25, (vec3) {.x = 1.1, .y = 1.1, .z = 1.1});
 }
 
@@ -419,9 +419,9 @@ int main(int argc, char **argv){
 	create_z_buffer();
 	screen = CAM_screen_create(stdscr, COLS - 1, LINES);
 	if(screen->width > screen->height){
-		fov_constant = screen->height/2;
+		fov_constant = screen->height*4/5;
 	} else {
-		fov_constant = screen->width/2;
+		fov_constant = screen->width*4/5;
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &current_time);
@@ -551,8 +551,6 @@ int main(int argc, char **argv){
 			case 'q':
 				quit = 1;
 				break;
-			case ' ':
-				first_frame = 0;
 		}
 		if(animation_frame < 10){
 			do_update = 1;
