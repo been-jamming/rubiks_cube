@@ -1,0 +1,3 @@
+[submodule "CAM-curses-ascii-matcher"]
+	path = CAM-curses-ascii-matcher
+	url = https://github.com/been-jamming/CAM-curses-ascii-matcher
