@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include <ncurses.h>
+#include <curses.h>
 #include <time.h>
 #include "CAM-curses-ascii-matcher/CAM.h"
 #include "3d.h"
