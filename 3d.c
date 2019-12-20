@@ -16,6 +16,7 @@ double fov_constant;
 vec3 normal;
 rubiks_cube r_cube;
 unsigned int scramble_moves_left = 0;
+orientation current_orientation = (orientation) {.real = 0, .i = 0, .j = 0, .k = 1};
 
 unsigned char faces[6][8] = {{0, 1, 2, 5, 8, 7, 6, 3}, {17, 20, 23, 24, 25, 22, 19, 18}, {23, 20, 17, 9, 0, 3, 6, 14}, {19, 22, 25, 16, 8, 5, 2, 11}, {0, 9, 17, 18, 19, 11, 2, 1}, {6, 7, 8, 16, 25, 24, 23, 14}};
 unsigned char faces_middles[6][4] = {{1, 5, 7, 3}, {20, 24, 22, 18}, {9, 3, 14, 20}, {11, 22, 16, 5}, {1, 9, 18, 11}, {7, 16, 24, 14}};
@@ -409,14 +410,79 @@ unsigned int get_seed_from_string(char *string){
 	return seed;
 }
 
+unsigned char write_shape(shape s, FILE *fp){
+	if(!fwrite(&(s.num_triangles), sizeof(unsigned int), 1, fp)){
+		return 1;
+	}
+	if(fwrite(s.triangles, sizeof(triangle), s.num_triangles, fp) < s.num_triangles){
+		return 1;
+	}
+	if(!fwrite(&(s.center), sizeof(vec3), 1, fp)){
+		return 1;
+	}
+	if(!fwrite(&(s.shape_orientation), sizeof(orientation), 1, fp)){
+		return 1;
+	}
+
+	return 0;
+}
+
+unsigned char read_shape(shape *s, FILE *fp){
+	if(!fread(&(s->num_triangles), sizeof(unsigned int), 1, fp)){
+		return 1;
+	}
+	if(fread(s->triangles, sizeof(triangle), s->num_triangles, fp) < s->num_triangles){
+		return 1;
+	}
+	if(!fread(&(s->center), sizeof(vec3), 1, fp)){
+		return 1;
+	}
+	if(!fread(&(s->shape_orientation), sizeof(orientation), 1, fp)){
+		return 1;
+	}
+
+	return 0;
+}
+
+unsigned char write_rubiks_cube(FILE *fp){
+	unsigned char i;
+
+	for(i = 0; i < 26; i++){
+		if(write_shape(r_cube.cubies[i], fp)){
+			return 1;
+		}
+	}
+	if(!fwrite(&current_orientation, sizeof(orientation), 1, fp)){
+		return 1;
+	}
+
+	return 0;
+}
+
+unsigned char read_rubiks_cube(FILE *fp){
+	unsigned char i;
+
+	for(i = 0; i < 26; i++){
+		if(read_shape(r_cube.cubies + i, fp)){
+			return 1;
+		}
+	}
+	if(!fread(&current_orientation, sizeof(orientation), 1, fp)){
+		return 1;
+	}
+
+	return 0;
+}
+
 unsigned char open_menu(){
 	menu main_menu;
 	text_entry seed_entry;
-	char *menu_items[3] = {"Resume", "Scramble", "Exit"};
+	char *menu_items[5] = {"Resume", "Scramble", "Save", "Load", "Exit"};
 	char input_buffer[32];
 	unsigned int seed;
+	FILE *fp;
 
-	main_menu = create_menu("Options", menu_items, 3, 1, 2);
+	main_menu = create_menu("Options", menu_items, 5, 1, 2);
 
 	do_menu(&main_menu);
 
@@ -436,6 +502,50 @@ unsigned char open_menu(){
 			break;
 		case 2:
 			free_menu(main_menu);
+			seed_entry = create_text_entry("Enter save name", 1, 2);
+			do_text_entry(&seed_entry, input_buffer, 32);
+			free_text_entry(seed_entry);
+			fp = fopen(input_buffer, "wb");
+			if(!fp){
+				main_menu = create_menu("Error saving file", menu_items, 1, 1, 2);
+				do_menu(&main_menu);
+				free_menu(main_menu);
+				return 0;
+			}
+			if(write_rubiks_cube(fp)){
+				fclose(fp);
+				main_menu = create_menu("Error saving file", menu_items, 1, 1, 2);
+				do_menu(&main_menu);
+				free_menu(main_menu);
+				return 0;
+			}
+			fclose(fp);
+			return 0;
+		case 3:
+			free_menu(main_menu);
+			seed_entry = create_text_entry("Enter load name", 1, 2);
+			do_text_entry(&seed_entry, input_buffer, 32);
+			free_text_entry(seed_entry);
+			fp = fopen(input_buffer, "rb");
+			if(!fp){
+				main_menu = create_menu("Error loading file", menu_items, 1, 1, 2);
+				do_menu(&main_menu);
+				free_menu(main_menu);
+				return 0;
+			}
+			if(read_rubiks_cube(fp)){
+				fclose(fp);
+				free_r_cube();
+				create_r_cube();
+				main_menu = create_menu("Error loading file", menu_items, 1, 1, 2);
+				do_menu(&main_menu);
+				free_menu(main_menu);
+				return 0;
+			}
+			fclose(fp);
+			return 0;
+		case 4:
+			free_menu(main_menu);
 			return 1;
 	}
 
@@ -446,7 +556,6 @@ int main(int argc, char **argv){
 	orientation x_rotate;
 	orientation y_rotate;
 	orientation z_rotate;
-	orientation current_orientation = (orientation) {.real = 0, .i = 0, .j = 0, .k = 1};
 	struct timespec current_time;
 	struct timespec sleep_time;
 	unsigned long int last_nanoseconds;
