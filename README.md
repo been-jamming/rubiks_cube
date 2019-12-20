@@ -26,7 +26,9 @@ Start the application in a terminal. Make sure that the terminal is the correct 
   - z and Z rotate the cube around the z axis.
 - Press f/F, b/B, l/L, r/R, u/U, or d/D to turn a face
   - f is forward, b back, l left, r right, u up, d down. Pressing Shift-face, ie F, B, L, R, U, or D will turn the face clockwise instead of counterclockwise.
-- Press q to quit
+- Press m to access the menu
+  - The menu allows you to scramble the cube or quit
+  - An empty seed to the cube scrambler sets the seed to a random seed.
 
 ### Feedback is welcome!
 
