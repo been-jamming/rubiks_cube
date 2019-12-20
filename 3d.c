@@ -203,7 +203,7 @@ void draw_triangle_3D(CAM_screen *s, triangle t, orientation p, vec3 center){
 	screen_p2 = get_point_3D(s, p2);
 
 	normal = cross(subtract(p0, p1), subtract(p0, p2));
-	if(normal.z < 0){
+	if(dot(normal, p0) < 0){
 		normal_constant = dot(normal, p0);
 
 		CAM_set_pixel_handler(pixel_handler);
