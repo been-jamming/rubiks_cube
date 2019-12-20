@@ -4,7 +4,9 @@
 #include <string.h>
 #include <curses.h>
 #include <time.h>
+#include <limits.h>
 #include "CAM-curses-ascii-matcher/CAM.h"
+#include "menu.h"
 #include "3d.h"
 
 CAM_screen *screen;
@@ -13,6 +15,7 @@ double normal_constant;
 double fov_constant;
 vec3 normal;
 rubiks_cube r_cube;
+unsigned int scramble_moves_left = 0;
 
 unsigned char faces[6][8] = {{0, 1, 2, 5, 8, 7, 6, 3}, {17, 20, 23, 24, 25, 22, 19, 18}, {23, 20, 17, 9, 0, 3, 6, 14}, {19, 22, 25, 16, 8, 5, 2, 11}, {0, 9, 17, 18, 19, 11, 2, 1}, {6, 7, 8, 16, 25, 24, 23, 14}};
 unsigned char faces_middles[6][4] = {{1, 5, 7, 3}, {20, 24, 22, 18}, {9, 3, 14, 20}, {11, 22, 16, 5}, {1, 9, 18, 11}, {7, 16, 24, 14}};
@@ -388,6 +391,57 @@ orientation create_random_rotation(){
 	return create_orientation(v, 0.005);
 }
 
+unsigned int get_random_seed(){
+	struct timespec current_time;
+
+	clock_gettime(CLOCK_MONOTONIC, &current_time);
+	return current_time.tv_nsec%UINT_MAX;
+}
+
+unsigned int get_seed_from_string(char *string){
+	unsigned int seed = 0;
+
+	while(*string){
+		seed = (seed<<7) | *string;
+		string++;
+	}
+
+	return seed;
+}
+
+unsigned char open_menu(){
+	menu main_menu;
+	text_entry seed_entry;
+	char *menu_items[3] = {"Resume", "Scramble", "Exit"};
+	char input_buffer[32];
+	unsigned int seed;
+
+	main_menu = create_menu("Options", menu_items, 3, 1, 2);
+
+	do_menu(&main_menu);
+
+	switch(main_menu.current_choice){
+		case 1:
+			free_menu(main_menu);
+			seed_entry = create_text_entry("Enter Seed", 1, 2);
+			do_text_entry(&seed_entry, input_buffer, 32);
+			free_text_entry(seed_entry);
+			if(input_buffer[0]){
+				seed = get_seed_from_string(input_buffer);
+			} else {
+				seed = get_random_seed();
+			}
+			srand(seed);
+			scramble_moves_left = 30;
+			break;
+		case 2:
+			free_menu(main_menu);
+			return 1;
+	}
+
+	return 0;
+}
+
 int main(int argc, char **argv){
 	orientation x_rotate;
 	orientation y_rotate;
@@ -401,15 +455,19 @@ int main(int argc, char **argv){
 	unsigned char do_update;
 	unsigned char quit = 0;
 	unsigned char first_frame = 1;
+	int key;
 
 	animation_frame = 10;
 	memset(&r_cube, 0, sizeof(rubiks_cube));
 	initscr();
 	cbreak();
+	curs_set(0);
 	nodelay(stdscr, 1);
 	keypad(stdscr, 1);
 	start_color();
-	CAM_init(1);
+	init_pair(1, COLOR_WHITE, COLOR_BLACK);
+	init_pair(2, COLOR_BLACK, COLOR_BLUE);
+	CAM_init(3);
 
 	create_r_cube();
 
@@ -433,7 +491,8 @@ int main(int argc, char **argv){
 			do_update = 1;
 			first_frame = 0;
 		}
-		switch(getch()){
+		key = getch();
+		switch(key){
 			case KEY_DOWN:
 				rotate_cube(x_rotate);
 				current_orientation = multiply_quaternions(x_rotate, current_orientation);
@@ -454,103 +513,117 @@ int main(int argc, char **argv){
 				current_orientation = multiply_quaternions(y_rotate, current_orientation);
 				do_update = 1;
 				break;
-			case 'z':
-				rotate_cube(z_rotate);
-				current_orientation = multiply_quaternions(z_rotate, current_orientation);
+			case 'm':
+				quit = open_menu();
+				clock_gettime(CLOCK_MONOTONIC, &current_time);
+				last_nanoseconds = current_time.tv_sec*1000000000 + current_time.tv_nsec;
 				do_update = 1;
 				break;
-			case 'Z':
-				rotate_cube(inverse_quaternion(z_rotate));
-				current_orientation = multiply_quaternions(inverse_quaternion(z_rotate), current_orientation);
-				do_update = 1;
-				break;
-			case 'f':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 0, .z = 1});
-					animation_frame = 0;
-					animation_direction = 0;
-				}
-				break;
-			case 'F':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 0, .z = 1});
-					animation_frame = 0;
-					animation_direction = 1;
-				}
-				break;
-			case 'u':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 1, .z = 0});
-					animation_frame = 0;
-					animation_direction = 0;
-				}
-				break;
-			case 'U':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 1, .z = 0});
-					animation_frame = 0;
-					animation_direction = 1;
-				}
-				break;
-			case 'd':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = -1, .z = 0});
-					animation_frame = 0;
-					animation_direction = 0;
-				}
-				break;
-			case 'D':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = -1, .z = 0});
-					animation_frame = 0;
-					animation_direction = 1;
-				}
-				break;
-			case 'l':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 1, .y = 0, .z = 0});
-					animation_frame = 0;
-					animation_direction = 0;
-				}
-				break;
-			case 'L':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 1, .y = 0, .z = 0});
-					animation_frame = 0;
-					animation_direction = 1;
-				}
-				break;
-			case 'r':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = -1, .y = 0, .z = 0});
-					animation_frame = 0;
-					animation_direction = 0;
-				}
-				break;
-			case 'R':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = -1, .y = 0, .z = 0});
-					animation_frame = 0;
-					animation_direction = 1;
-				}
-				break;
-			case 'b':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 0, .z = -1});
-					animation_frame = 0;
-					animation_direction = 0;
-				}
-				break;
-			case 'B':
-				if(animation_frame >= 10){
-					animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 0, .z = -1});
-					animation_frame = 0;
-					animation_direction = 1;
-				}
-				break;
-			case 'q':
-				quit = 1;
-				break;
+		}
+		if(scramble_moves_left){
+			if(animation_frame == 10){
+				animation_frame = 0;
+				animation_face = (animation_face + rand()%5 + 1)%6;
+				animation_direction = rand()&1;
+				scramble_moves_left--;
+			}
+		} else {
+			switch(key){
+				case 'z':
+					rotate_cube(z_rotate);
+					current_orientation = multiply_quaternions(z_rotate, current_orientation);
+					do_update = 1;
+					break;
+				case 'Z':
+					rotate_cube(inverse_quaternion(z_rotate));
+					current_orientation = multiply_quaternions(inverse_quaternion(z_rotate), current_orientation);
+					do_update = 1;
+					break;
+				case 'f':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 0, .z = 1});
+						animation_frame = 0;
+						animation_direction = 0;
+					}
+					break;
+				case 'F':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 0, .z = 1});
+						animation_frame = 0;
+						animation_direction = 1;
+					}
+					break;
+				case 'u':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 1, .z = 0});
+						animation_frame = 0;
+						animation_direction = 0;
+					}
+					break;
+				case 'U':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 1, .z = 0});
+						animation_frame = 0;
+						animation_direction = 1;
+					}
+					break;
+				case 'd':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = -1, .z = 0});
+						animation_frame = 0;
+						animation_direction = 0;
+					}
+					break;
+				case 'D':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = -1, .z = 0});
+						animation_frame = 0;
+						animation_direction = 1;
+					}
+					break;
+				case 'l':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 1, .y = 0, .z = 0});
+						animation_frame = 0;
+						animation_direction = 0;
+					}
+					break;
+				case 'L':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 1, .y = 0, .z = 0});
+						animation_frame = 0;
+						animation_direction = 1;
+					}
+					break;
+				case 'r':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = -1, .y = 0, .z = 0});
+						animation_frame = 0;
+						animation_direction = 0;
+					}
+					break;
+				case 'R':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = -1, .y = 0, .z = 0});
+						animation_frame = 0;
+						animation_direction = 1;
+					}
+					break;
+				case 'b':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 0, .z = -1});
+						animation_frame = 0;
+						animation_direction = 0;
+					}
+					break;
+				case 'B':
+					if(animation_frame >= 10){
+						animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 0, .z = -1});
+						animation_frame = 0;
+						animation_direction = 1;
+					}
+					break;
+			}
 		}
 		if(animation_frame < 10){
 			do_update = 1;
