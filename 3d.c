@@ -410,8 +410,8 @@ unsigned int get_seed_from_string(char *string){
 	return seed;
 }
 
-unsigned char write_shape(shape s, FILE *fp){
-	if(!fwrite(&(s.num_triangles), sizeof(unsigned int), 1, fp)){
+unsigned char write_shape(shape s, unsigned int max_triangles, FILE *fp){
+	if(!fwrite(&(s.num_triangles), sizeof(unsigned int), 1, fp) || s.num_triangles > max_triangles){
 		return 1;
 	}
 	if(fwrite(s.triangles, sizeof(triangle), s.num_triangles, fp) < s.num_triangles){
@@ -427,8 +427,8 @@ unsigned char write_shape(shape s, FILE *fp){
 	return 0;
 }
 
-unsigned char read_shape(shape *s, FILE *fp){
-	if(!fread(&(s->num_triangles), sizeof(unsigned int), 1, fp)){
+unsigned char read_shape(shape *s, unsigned int max_triangles, FILE *fp){
+	if(!fread(&(s->num_triangles), sizeof(unsigned int), 1, fp) || s->num_triangles > max_triangles){
 		return 1;
 	}
 	if(fread(s->triangles, sizeof(triangle), s->num_triangles, fp) < s->num_triangles){
@@ -448,7 +448,7 @@ unsigned char write_rubiks_cube(FILE *fp){
 	unsigned char i;
 
 	for(i = 0; i < 26; i++){
-		if(write_shape(r_cube.cubies[i], fp)){
+		if(write_shape(r_cube.cubies[i], 12, fp)){
 			return 1;
 		}
 	}
@@ -463,7 +463,7 @@ unsigned char read_rubiks_cube(FILE *fp){
 	unsigned char i;
 
 	for(i = 0; i < 26; i++){
-		if(read_shape(r_cube.cubies + i, fp)){
+		if(read_shape(r_cube.cubies + i, 12, fp)){
 			return 1;
 		}
 	}
