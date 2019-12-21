@@ -1,6 +1,8 @@
 # rubiks_cube
 A rubik's cube that runs in your terminal!
 
+![alt text](screenshots/screenshot.png)
+
 ## Compilation:
 
 ### Depedencies: ncurses or curses
