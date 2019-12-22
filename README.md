@@ -13,7 +13,7 @@ make
 ```
 or
 ```
-gcc 3d.c CAM-curses-ascii-matcher/CAM.c -Wall -Ofast -ffast-math -lm -lncurses -o rubiks_cube
+gcc 3d.c menu.c CAM-curses-ascii-matcher/CAM.c -Wall -Ofast -ffast-math -lm -lncurses -o rubiks_cube
 ```
 to compile on Linux.
 
