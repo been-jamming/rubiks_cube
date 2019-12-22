@@ -36,5 +36,4 @@ Start the application in a terminal. Make sure that the terminal is the correct 
 
 ### Possible upcoming features
 - The ability to use any nxn cube
-- A scramble button
 - An automatic, efficient solver
