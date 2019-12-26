@@ -94,7 +94,7 @@ void create_z_buffer(){
 	for(i = 0; i < (COLS - 1)*8; i++){
 		z_buffer[i] = malloc(sizeof(double)*LINES*13);
 		for(j = 0; j < LINES*13; j++){
-			z_buffer[i][j] = 1.0/0.0;
+			z_buffer[i][j] = INFINITY;
 		}
 	}
 }
