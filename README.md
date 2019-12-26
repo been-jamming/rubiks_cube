@@ -1,6 +1,8 @@
 # rubiks_cube
 A rubik's cube that runs in your terminal!
 
+![alt text](screenshots/screenshot.png)
+
 ## Compilation:
 
 ### Depedencies: ncurses or curses
@@ -11,7 +13,7 @@ make
 ```
 or
 ```
-gcc 3d.c CAM-curses-ascii-matcher/CAM.c -Wall -Ofast -ffast-math -lm -lncurses -o rubiks_cube
+gcc 3d.c menu.c CAM-curses-ascii-matcher/CAM.c -Wall -Ofast -ffast-math -lm -lncurses -o rubiks_cube
 ```
 to compile on Linux.
 
@@ -27,12 +29,11 @@ Start the application in a terminal. Make sure that the terminal is the correct 
 - Press f/F, b/B, l/L, r/R, u/U, or d/D to turn a face
   - f is forward, b back, l left, r right, u up, d down. Pressing Shift-face, ie F, B, L, R, U, or D will turn the face clockwise instead of counterclockwise.
 - Press m to access the menu
-  - The menu allows you to scramble the cube or quit
+  - The menu allows you to scramble the cube, save, load, or quit
   - An empty seed to the cube scrambler sets the seed to a random seed.
 
 ### Feedback is welcome!
 
 ### Possible upcoming features
 - The ability to use any nxn cube
-- A scramble button
 - An automatic, efficient solver
