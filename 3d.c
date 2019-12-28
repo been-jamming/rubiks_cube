@@ -487,6 +487,9 @@ unsigned char open_menu(){
 	do_menu(&main_menu);
 
 	switch(main_menu.current_choice){
+		case 0:
+			free_menu(main_menu);
+			break;
 		case 1:
 			free_menu(main_menu);
 			seed_entry = create_text_entry("Enter Seed", 1, 2);
@@ -624,9 +627,10 @@ int main(int argc, char **argv){
 				break;
 			case 'm':
 				quit = open_menu();
+				werase(stdscr);
+				do_update = 1;
 				clock_gettime(CLOCK_MONOTONIC, &current_time);
 				last_nanoseconds = current_time.tv_sec*1000000000 + current_time.tv_nsec;
-				do_update = 1;
 				break;
 		}
 		if(scramble_moves_left){
