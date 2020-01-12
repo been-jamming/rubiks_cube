@@ -86,17 +86,29 @@ orientation create_orientation(vec3 v, double angle){
 	return (orientation) {.real = cos(angle/2), .i = v.x*sin(angle/2)/d, .j = v.y*sin(angle/2)/d, .k = v.z*sin(angle/2)/d};
 }
 
-void create_z_buffer(){
+unsigned char create_z_buffer(){
 	unsigned int i;
 	unsigned int j;
 
 	z_buffer = malloc(sizeof(double *)*(COLS - 1)*8);
+	if(!z_buffer){
+		return 1;
+	}
 	for(i = 0; i < (COLS - 1)*8; i++){
 		z_buffer[i] = malloc(sizeof(double)*LINES*13);
+		if(!z_buffer[i]){
+			for(j = 0; j < i; j++){
+				free(z_buffer[j]);
+			}
+			free(z_buffer);
+			return 1;
+		}
 		for(j = 0; j < LINES*13; j++){
 			z_buffer[i][j] = INFINITY;
 		}
 	}
+
+	return 0;
 }
 
 void clear_z_buffer(){
@@ -144,6 +156,11 @@ void create_cube(shape *s, vec3 center, double width, unsigned char color0, unsi
 
 	s->num_triangles = 12;
 	s->triangles = malloc(sizeof(triangle)*12);
+	if(!s->triangles){
+		free_z_buffer();
+		fprintf(stderr, "Error: not enough memory\n");
+		exit(1);
+	}
 
 	p0 = (vec3) {.x = -width/2, .y = width/2, .z = -width/2};
 	p1 = (vec3) {.x = width/2, .y = width/2, .z = -width/2};
@@ -581,12 +598,15 @@ int main(int argc, char **argv){
 	init_pair(2, COLOR_BLACK, COLOR_BLUE);
 	CAM_init(3);
 
+	if(create_z_buffer()){
+		fprintf(stderr, "Error: not enough memory\n");
+		exit(1);
+	}
 	create_r_cube();
 
 	x_rotate = create_orientation((vec3) {.x = 1, .y = 0, .z = 0}, 0.2);
 	y_rotate = create_orientation((vec3) {.x = 0, .y = 1, .z = 0}, 0.2);
 	z_rotate = create_orientation((vec3) {.x = 0, .y = 0, .z = 1}, 0.2);
-	create_z_buffer();
 	screen = CAM_screen_create(stdscr, COLS - 1, LINES);
 	if(screen->width > screen->height){
 		fov_constant = screen->height*4/5;
