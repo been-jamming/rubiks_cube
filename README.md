@@ -11,13 +11,15 @@ Use
 ```
 make
 ```
-or
-```
-gcc 3d.c menu.c CAM-curses-ascii-matcher/CAM.c -Wall -Ofast -ffast-math -lm -lncurses -o rubiks_cube
-```
-to compile on Linux.
+to build on Linux.
 
 On Windows, compilation can be done using a port of curses for Windows such as [pdcurses](https://pdcurses.org/).
+
+To install, use
+```
+make install
+```
+Which will install the binary to /usr/bin by default and the license to /usr/share/licenses/rubiks_cube/LICENSE.
 
 ## How to Use:
 Start the application in a terminal. Make sure that the terminal is the correct size before starting the application, as you cannot resize the terminal during runtime as of now.
