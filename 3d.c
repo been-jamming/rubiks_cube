@@ -519,8 +519,10 @@ unsigned char read_rubiks_cube(FILE *fp){
 
 unsigned char open_menu(){
 	menu main_menu;
+	menu unable_menu;
 	text_entry seed_entry;
 	char *menu_items[5] = {"Resume", "Scramble", "Save", "Load", "Exit"};
+	char *ok_item = "Ok";
 	char input_buffer[32];
 	unsigned int seed;
 	FILE *fp;
@@ -548,6 +550,12 @@ unsigned char open_menu(){
 			break;
 		case 2:
 			free_menu(main_menu);
+			if(animation_frame < 10 || scramble_moves_left){
+				unable_menu = create_menu("Unable to save during animation", &ok_item, 1, 1, 2);
+				do_menu(&unable_menu);
+				free_menu(unable_menu);
+				return 0;
+			}
 			seed_entry = create_text_entry("Enter save name", 1, 2);
 			do_text_entry(&seed_entry, input_buffer, 32);
 			free_text_entry(seed_entry);
@@ -569,6 +577,12 @@ unsigned char open_menu(){
 			return 0;
 		case 3:
 			free_menu(main_menu);
+			if(animation_frame < 10 || scramble_moves_left){
+				unable_menu = create_menu("Unable to load during animation", &ok_item, 1, 1, 2);
+				do_menu(&unable_menu);
+				free_menu(unable_menu);
+				return 0;
+			}
 			seed_entry = create_text_entry("Enter load name", 1, 2);
 			do_text_entry(&seed_entry, input_buffer, 32);
 			free_text_entry(seed_entry);
