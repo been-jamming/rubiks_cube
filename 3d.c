@@ -5,9 +5,14 @@
 #include <curses.h>
 #include <time.h>
 #include <limits.h>
+#include <signal.h>
 #include "CAM-curses-ascii-matcher/CAM.h"
 #include "menu.h"
 #include "3d.h"
+
+struct sigaction curses_old_action;
+unsigned int z_buffer_cols;
+unsigned int z_buffer_lines;
 
 CAM_screen *screen;
 double **z_buffer;
@@ -90,12 +95,15 @@ unsigned char create_z_buffer(){
 	unsigned int i;
 	unsigned int j;
 
-	z_buffer = malloc(sizeof(double *)*(COLS - 1)*8);
+	z_buffer_cols = COLS;
+	z_buffer_lines = LINES;
+
+	z_buffer = malloc(sizeof(double *)*(z_buffer_cols - 1)*8);
 	if(!z_buffer){
 		return 1;
 	}
-	for(i = 0; i < (COLS - 1)*8; i++){
-		z_buffer[i] = malloc(sizeof(double)*LINES*13);
+	for(i = 0; i < (z_buffer_cols - 1)*8; i++){
+		z_buffer[i] = malloc(sizeof(double)*z_buffer_lines*13);
 		if(!z_buffer[i]){
 			for(j = 0; j < i; j++){
 				free(z_buffer[j]);
@@ -103,7 +111,7 @@ unsigned char create_z_buffer(){
 			free(z_buffer);
 			return 1;
 		}
-		for(j = 0; j < LINES*13; j++){
+		for(j = 0; j < z_buffer_lines*13; j++){
 			z_buffer[i][j] = INFINITY;
 		}
 	}
@@ -115,8 +123,8 @@ void clear_z_buffer(){
 	unsigned int i;
 	unsigned int j;
 
-	for(i = 0; i < (COLS - 1)*8; i++){
-		for(j = 0; j < LINES*13; j++){
+	for(i = 0; i < (z_buffer_cols - 1)*8; i++){
+		for(j = 0; j < z_buffer_lines*13; j++){
 			z_buffer[i][j] = INFINITY;
 		}
 	}
@@ -124,7 +132,7 @@ void clear_z_buffer(){
 
 void free_z_buffer(){
 	unsigned int i;
-	for(i = 0; i < (COLS - 1)*8; i++){
+	for(i = 0; i < (z_buffer_cols - 1)*8; i++){
 		free(z_buffer[i]);
 	}
 	free(z_buffer);
@@ -157,9 +165,7 @@ void create_cube(shape *s, vec3 center, double width, unsigned char color0, unsi
 	s->num_triangles = 12;
 	s->triangles = malloc(sizeof(triangle)*12);
 	if(!s->triangles){
-		free_z_buffer();
-		fprintf(stderr, "Error: not enough memory\n");
-		exit(1);
+		return;
 	}
 
 	p0 = (vec3) {.x = -width/2, .y = width/2, .z = -width/2};
@@ -333,6 +339,25 @@ void do_animation_frame(orientation current_orientation){
 	}
 }
 
+unsigned char check_r_cube(){
+	unsigned int i;
+
+	for(i = 0; i < 26; i++){
+		if(!r_cube.cubies[i].triangles)
+			return 1;
+	}
+
+	return 0;
+}
+
+void free_r_cube(){
+	unsigned int i;
+
+	for(i = 0; i < 26; i++){
+		free(r_cube.cubies[i].triangles);
+	}
+}
+
 void create_r_cube(){
 	//Top slice
 	create_cube(r_cube.cubies, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_BLACK, COLOR_RED, COLOR_BLUE, COLOR_BLACK, COLOR_YELLOW, COLOR_BLACK);
@@ -391,13 +416,14 @@ void create_r_cube(){
 	translate_shape(r_cube.cubies + 24, (vec3) {.x = 0, .y = 1.1, .z = 1.1});
 	create_cube(r_cube.cubies + 25, (vec3) {.x = 0, .y = 0, .z = 5.5}, 1, COLOR_MAGENTA, COLOR_BLACK, COLOR_BLACK, COLOR_GREEN, COLOR_BLACK, COLOR_CYAN);
 	translate_shape(r_cube.cubies + 25, (vec3) {.x = 1.1, .y = 1.1, .z = 1.1});
-}
 
-void free_r_cube(){
-	unsigned int i;
-
-	for(i = 0; i < 26; i++){
-		free(r_cube.cubies[i].triangles);
+	if(check_r_cube()){
+		free_r_cube();
+		free_z_buffer();
+		CAM_screen_free(screen);
+		endwin();
+		fprintf(stderr, "Error: not enough memory\n");
+		exit(1);
 	}
 }
 
@@ -572,6 +598,38 @@ unsigned char open_menu(){
 	return 0;
 }
 
+void resize(int sig, siginfo_t *sinfo, void *v){
+	if(curses_old_action.sa_flags&SA_SIGINFO)
+		curses_old_action.sa_sigaction(sig, sinfo, v);
+	else
+		curses_old_action.sa_handler(sig);
+	endwin();
+	refresh();
+	CAM_screen_free(screen);
+	screen = CAM_screen_create(stdscr, COLS - 1, LINES);
+	init_pair(1, COLOR_WHITE, COLOR_BLACK);
+	init_pair(2, COLOR_BLACK, COLOR_CYAN);
+	CAM_init(3);
+	if(screen->width > screen->height){
+		fov_constant = screen->height*4/5;
+	} else {
+		fov_constant = screen->width*4/5;
+	}
+	free_z_buffer();
+	create_z_buffer();
+}
+
+void install_resize_handler(){
+	struct sigaction new_action;
+
+	new_action.sa_sigaction = resize;
+	sigemptyset(&new_action.sa_mask);
+	new_action.sa_flags = SA_SIGINFO;
+	new_action.sa_restorer = NULL;
+
+	sigaction(SIGWINCH, &new_action, &curses_old_action);
+}
+
 int main(int argc, char **argv){
 	orientation x_rotate;
 	orientation y_rotate;
@@ -585,6 +643,10 @@ int main(int argc, char **argv){
 	unsigned char quit = 0;
 	unsigned char first_frame = 1;
 	int key;
+	sigset_t ignore_winch;
+
+	sigemptyset(&ignore_winch);
+	sigaddset(&ignore_winch, SIGWINCH);
 
 	animation_frame = 10;
 	memset(&r_cube, 0, sizeof(rubiks_cube));
@@ -596,11 +658,16 @@ int main(int argc, char **argv){
 	start_color();
 	init_pair(1, COLOR_WHITE, COLOR_BLACK);
 	init_pair(2, COLOR_BLACK, COLOR_CYAN);
-	CAM_init(3);
+	if(CAM_init(3)){
+		endwin();
+		fprintf(stderr, "Error: terminal does not support colors\n");
+		return 1;
+	}
 
 	if(create_z_buffer()){
+		endwin();
 		fprintf(stderr, "Error: not enough memory\n");
-		exit(1);
+		return 1;
 	}
 	create_r_cube();
 
@@ -614,9 +681,14 @@ int main(int argc, char **argv){
 		fov_constant = screen->width*4/5;
 	}
 
+	install_resize_handler();
+
 	clock_gettime(CLOCK_MONOTONIC, &current_time);
 	last_nanoseconds = current_time.tv_sec*1000000000 + current_time.tv_nsec;
+	sigprocmask(SIG_BLOCK, &ignore_winch, NULL);
 	while(!quit){
+		sigprocmask(SIG_UNBLOCK, &ignore_winch, NULL);
+		sigprocmask(SIG_BLOCK, &ignore_winch, NULL);
 		if(!first_frame){
 			do_update = 0;
 		} else {
