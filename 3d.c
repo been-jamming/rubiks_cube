@@ -885,6 +885,16 @@ int main(int argc, char **argv){
 					do_update = 1;
 				}
 				break;
+			case 'z':
+				rotate_cube(z_rotate);
+				current_orientation = multiply_quaternions(z_rotate, current_orientation);
+				do_update = 1;
+				break;
+			case 'Z':
+				rotate_cube(inverse_quaternion(z_rotate));
+				current_orientation = multiply_quaternions(inverse_quaternion(z_rotate), current_orientation);
+				do_update = 1;
+				break;
 			case ' ':
 				if(reorient_frame >= ORIENT_FRAMES){
 					start_reorientation();
@@ -907,16 +917,6 @@ int main(int argc, char **argv){
 			}
 		} else {
 			switch(key){
-				case 'z':
-					rotate_cube(z_rotate);
-					current_orientation = multiply_quaternions(z_rotate, current_orientation);
-					do_update = 1;
-					break;
-				case 'Z':
-					rotate_cube(inverse_quaternion(z_rotate));
-					current_orientation = multiply_quaternions(inverse_quaternion(z_rotate), current_orientation);
-					do_update = 1;
-					break;
 				case 'f':
 					if(animation_frame >= 10){
 						animation_face = get_face(current_orientation, (vec3) {.x = 0, .y = 0, .z = 1});
