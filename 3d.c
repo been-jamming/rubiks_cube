@@ -10,6 +10,14 @@
 #include "menu.h"
 #include "3d.h"
 
+#define ORIENT_FRAMES 5
+
+#ifndef M_PI
+
+#define M_PI 3.14159265358979323846
+
+#endif
+
 struct sigaction curses_old_action;
 unsigned int z_buffer_cols;
 unsigned int z_buffer_lines;
@@ -32,6 +40,26 @@ unsigned char animation_face;
 unsigned char animation_frame;
 unsigned char animation_direction;
 
+unsigned char reorient_frame;
+orientation reorient_orientation;
+orientation original_orientation;
+
+vec3 corner_vectors[4] = {
+	(vec3) {.x = -1, .y = 1, .z = -1},
+	(vec3) {.x = -1, .y = 1, .z = 1},
+	(vec3) {.x = 1, .y = 1, .z = -1},
+	(vec3) {.x = 1, .y = 1, .z = 1}
+};
+
+vec3 edge_vectors[6] = {
+	(vec3) {.x = 0, .y = 1, .z = -1},
+	(vec3) {.x = 0, .y = 1, .z = 1},
+	(vec3) {.x = 1, .y = 1, .z = 0},
+	(vec3) {.x = -1, .y = 1, .z = 0},
+	(vec3) {.x = 1, .y = 0, .z = -1},
+	(vec3) {.x = -1, .y = 0, .z = -1}
+};
+
 vec3 cross(vec3 a, vec3 b){
 	vec3 output;
 
@@ -52,6 +80,23 @@ vec3 subtract(vec3 a, vec3 b){
 
 vec3 add(vec3 a, vec3 b){
 	return (vec3) {.x = a.x + b.x, .y = a.y + b.y, .z = a.z + b.z};
+}
+
+orientation normalize_quaternion(orientation a){
+	orientation output;
+	double length;
+
+	length = sqrt(a.real*a.real + a.i*a.i + a.j*a.j + a.k*a.k);
+	output.real = a.real/length;
+	output.i = a.i/length;
+	output.j = a.j/length;
+	output.k = a.k/length;
+
+	return output;
+}
+
+orientation positive_orientation(orientation a){
+	return (orientation) {.real = fabs(a.real), .i = fabs(a.i), .j = fabs(a.j), .k = fabs(a.k)};
 }
 
 orientation multiply_quaternions(orientation a, orientation b){
@@ -89,6 +134,42 @@ orientation create_orientation(vec3 v, double angle){
 
 	d = sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
 	return (orientation) {.real = cos(angle/2), .i = v.x*sin(angle/2)/d, .j = v.y*sin(angle/2)/d, .k = v.z*sin(angle/2)/d};
+}
+
+double orientation_inner_product(orientation a, orientation b){
+	return a.real*b.real + a.i*b.i + a.j*b.j + a.k*b.k;
+}
+
+double orientation_score(orientation a, orientation b){
+	double prod;
+
+	prod = orientation_inner_product(a, b);
+	return (acos(2*prod*prod - 1));
+}
+
+orientation average_orientations(orientation a, orientation b, double weight){
+	return (orientation) {.real = a.real*weight + b.real*(1 - weight), .i = a.i*weight + b.i*(1 - weight), .j = a.j*weight + b.j*(1 - weight), .k = a.k*weight + b.k*(1 - weight)};
+}
+
+orientation orientation_from_to(vec3 a, vec3 b){
+	orientation output;
+	double a_len_squared;
+	double b_len_squared;
+	double d;
+	vec3 c;
+
+	d = dot(a, b);
+	if(d < -0.9999)
+		return (orientation) {.real = 0, .i = 1, .j = 0, .k = 0};
+	c = cross(a, b);
+	output.i = c.x;
+	output.j = c.y;
+	output.k = c.z;
+	a_len_squared = dot(a, a);
+	b_len_squared = dot(b, b);
+	output.real = sqrt(a_len_squared*b_len_squared) + d;
+
+	return normalize_quaternion(output);
 }
 
 unsigned char create_z_buffer(){
@@ -336,6 +417,70 @@ void do_animation_frame(orientation current_orientation){
 				r_cube.cubies[faces_corners[animation_face][3]] = temp_shape;
 			}
 		}
+	}
+}
+
+void start_reorientation(){
+	double best_score;
+	double score;
+	unsigned int i;
+	unsigned int j;
+	orientation check_orientation;
+
+	original_orientation = current_orientation;
+	reorient_orientation = (orientation) {.real = 1, .i = 0, .j = 0, .k = 0};
+	best_score = orientation_score(original_orientation, check_orientation);
+
+	for(i = 0; i < 3; i++){
+		for(j = 1; j < 4; j++){
+			check_orientation = create_orientation(face_vectors[i*2], j*M_PI/2);
+			score = orientation_score(original_orientation, check_orientation);
+			if(score < best_score){
+				best_score = score;
+				reorient_orientation = check_orientation;
+			}
+		}
+	}
+
+	for(i = 0; i < 4; i++){
+		for(j = 1; j < 3; j++){
+			check_orientation = create_orientation(corner_vectors[i], j*2*M_PI/3);
+			score = orientation_score(original_orientation, check_orientation);
+			if(score < best_score){
+				best_score = score;
+				reorient_orientation = check_orientation;
+			}
+		}
+	}
+
+	for(i = 0; i < 6; i++){
+		check_orientation = create_orientation(edge_vectors[i], M_PI);
+		score = orientation_score(original_orientation, check_orientation);
+		if(score < best_score){
+			best_score = score;
+			reorient_orientation = check_orientation;
+		}
+	}
+
+	reorient_frame = 0;
+}
+
+void do_reorient_frame(){
+	orientation next_rotation;
+	orientation total_rotation;
+	vec3 vec;
+	double total_angle;
+
+	if(reorient_frame < ORIENT_FRAMES){
+		reorient_frame++;
+		total_rotation = multiply_quaternions(reorient_orientation, inverse_quaternion(original_orientation));
+		vec = (vec3) {.x = total_rotation.i, .y = total_rotation.j, .z = total_rotation.k};
+		total_angle = 2*acos(total_rotation.real);
+		if(total_angle > M_PI)
+			total_angle = total_angle - 2*M_PI;
+		next_rotation = create_orientation(vec, total_angle/ORIENT_FRAMES);
+		current_orientation = multiply_quaternions(next_rotation, current_orientation);
+		rotate_cube(next_rotation);
 	}
 }
 
@@ -663,6 +808,7 @@ int main(int argc, char **argv){
 	sigaddset(&ignore_winch, SIGWINCH);
 
 	animation_frame = 10;
+	reorient_frame = ORIENT_FRAMES;
 	memset(&r_cube, 0, sizeof(rubiks_cube));
 	initscr();
 	cbreak();
@@ -685,9 +831,9 @@ int main(int argc, char **argv){
 	}
 	create_r_cube();
 
-	x_rotate = create_orientation((vec3) {.x = 1, .y = 0, .z = 0}, 0.2);
-	y_rotate = create_orientation((vec3) {.x = 0, .y = 1, .z = 0}, 0.2);
-	z_rotate = create_orientation((vec3) {.x = 0, .y = 0, .z = 1}, 0.2);
+	x_rotate = create_orientation((vec3) {.x = 1, .y = 0, .z = 0}, M_PI/16);
+	y_rotate = create_orientation((vec3) {.x = 0, .y = 1, .z = 0}, M_PI/16);
+	z_rotate = create_orientation((vec3) {.x = 0, .y = 0, .z = 1}, M_PI/16);
 	screen = CAM_screen_create(stdscr, COLS - 1, LINES);
 	if(screen->width > screen->height){
 		fov_constant = screen->height*4/5;
@@ -711,25 +857,38 @@ int main(int argc, char **argv){
 		}
 		key = getch();
 		switch(key){
-			case KEY_DOWN:
-				rotate_cube(x_rotate);
-				current_orientation = multiply_quaternions(x_rotate, current_orientation);
-				do_update = 1;
-				break;
 			case KEY_UP:
-				rotate_cube(inverse_quaternion(x_rotate));
-				current_orientation = multiply_quaternions(inverse_quaternion(x_rotate), current_orientation);
-				do_update = 1;
+				if(reorient_frame >= ORIENT_FRAMES){
+					rotate_cube(x_rotate);
+					current_orientation = multiply_quaternions(x_rotate, current_orientation);
+					do_update = 1;
+				}
 				break;
-			case KEY_RIGHT:
-				rotate_cube(inverse_quaternion(y_rotate));
-				current_orientation = multiply_quaternions(inverse_quaternion(y_rotate), current_orientation);
-				do_update = 1;
+			case KEY_DOWN:
+				if(reorient_frame >= ORIENT_FRAMES){
+					rotate_cube(inverse_quaternion(x_rotate));
+					current_orientation = multiply_quaternions(inverse_quaternion(x_rotate), current_orientation);
+					do_update = 1;
+				}
 				break;
 			case KEY_LEFT:
-				rotate_cube(y_rotate);
-				current_orientation = multiply_quaternions(y_rotate, current_orientation);
-				do_update = 1;
+				if(reorient_frame >= ORIENT_FRAMES){
+					rotate_cube(inverse_quaternion(y_rotate));
+					current_orientation = multiply_quaternions(inverse_quaternion(y_rotate), current_orientation);
+					do_update = 1;
+				}
+				break;
+			case KEY_RIGHT:
+				if(reorient_frame >= ORIENT_FRAMES){
+					rotate_cube(y_rotate);
+					current_orientation = multiply_quaternions(y_rotate, current_orientation);
+					do_update = 1;
+				}
+				break;
+			case ' ':
+				if(reorient_frame >= ORIENT_FRAMES){
+					start_reorientation();
+				}
 				break;
 			case 'm':
 				quit = open_menu();
@@ -844,10 +1003,11 @@ int main(int argc, char **argv){
 					break;
 			}
 		}
-		if(animation_frame < 10){
+		if(animation_frame < 10 || reorient_frame < ORIENT_FRAMES){
 			do_update = 1;
 		}
 		do_animation_frame(current_orientation);
+		do_reorient_frame();
 		if(do_update){
 			clear_z_buffer();
 			CAM_fill(screen, COLOR_WHITE);
