@@ -144,7 +144,7 @@ double orientation_score(orientation a, orientation b){
 	double prod;
 
 	prod = orientation_inner_product(a, b);
-	return (acos(2*prod*prod - 1));
+	return acos(2*prod*prod - 1);
 }
 
 orientation average_orientations(orientation a, orientation b, double weight){
@@ -429,7 +429,7 @@ void start_reorientation(){
 
 	original_orientation = current_orientation;
 	reorient_orientation = (orientation) {.real = 1, .i = 0, .j = 0, .k = 0};
-	best_score = orientation_score(original_orientation, check_orientation);
+	best_score = orientation_score(original_orientation, reorient_orientation);
 
 	for(i = 0; i < 3; i++){
 		for(j = 1; j < 4; j++){
